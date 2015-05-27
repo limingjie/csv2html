@@ -1,76 +1,72 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <boost/tokenizer.hpp>
+
+#include "csvmm.hpp"
 
 const std::string html_begin =
-    "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n"
-    "<title>csvtohtml</title>\n"
-    "<style type=\"text/css\">\n"
-    "table.csvtohtml"
-    "{border-collapse:collapse;border-spacing:0;display:block;width:100%;"
-    "overflow:auto;font-size:1em;word-break:normal;word-break:keep-all;}\n"
-    "table.csvtohtml td"
-    "{padding:0;padding:2px 4px;border:1px solid #ddd;}\n"
-    "table.csvtohtml tr"
-    "{border:0;background-color:#fff;border-top:1px solid #ccc;}\n"
-    "table.csvtohtml tr:nth-child(1)"
-    "{background-color: #007098;color: white;font-weight: bold;}\n"
-    "table.csvtohtml tr:nth-child(2n)"
-    "{background-color: #f8f8f8;}\n"
-    "</style>\n</head>\n<body>\n<table class=\"csvtohtml\">\n<tbody>\n";
+    "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>csvtohtm"
+    "l</title>\n<style type=\"text/css\">\ntable.csvtohtml{border-collapse:coll"
+    "apse;border-spacing:0;display:block;width:100%;overflow:auto;font-size:1em"
+    ";word-break:normal;word-break:keep-all;}\ntable.csvtohtml td{padding:0;pad"
+    "ding:2px 4px;border:1px solid #ddd;}\ntable.csvtohtml tr{border:0;backgrou"
+    "nd-color:#fff;border-top:1px solid #ccc;}\ntable.csvtohtml tr:nth-child(1)"
+    "{background-color: #007098;color: white;font-weight: bold;}\ntable.csvtoht"
+    "ml tr:nth-child(2n){background-color: #f8f8f8;}\n</style>\n</head>\n<body>"
+    "\n<table class=\"csvtohtml\">\n<tbody>\n";
 
 const std::string html_end = "</tbody>\n</table>\n</body>\n</html>\n";
 
-void process_line(std::string &line)
+// http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string
+std::string encode(const std::string& data)
 {
-    static size_t count = 0;
-
-    ++count;
-
-    std::cout << "<tr>\n";
-
-    try
+    std::string buffer;
+    buffer.reserve(data.size());
+    for (size_t pos = 0; pos != data.size(); ++pos)
     {
-        std::string html;
-        boost::escaped_list_separator<char> els("", ",", "\"");
-        boost::tokenizer<boost::escaped_list_separator<char>> tok(line, els);
-        for (auto it = tok.begin(); it != tok.end(); ++it)
+        switch(data[pos])
         {
-            html += "  <td>" + *it + "</td>\n";
+            case '&':  buffer.append("&amp;");       break;
+            case '\"': buffer.append("&quot;");      break;
+            case '\'': buffer.append("&apos;");      break;
+            case '<':  buffer.append("&lt;");        break;
+            case '>':  buffer.append("&gt;");        break;
+            case '\r':                               break;
+            case '\n': buffer.append("<br>");        break;
+            default:   buffer.append(&data[pos], 1); break;
         }
-        std::cout << html;
-    }
-    catch (boost::escaped_list_error &e)
-    {
-        // invalid escape sequence, tokenize again by comma only.
-        std::cerr << "Error:" << count << ": " << e.what()
-            << "\nLine " << count << ": " << line << std::endl;
     }
 
-    std::cout << "</tr>\n";
+    return buffer;
 }
 
-bool csv2html(std::string filename)
+void csv2html(std::string filename)
 {
-    // check file
-    std::ifstream file(filename);
-    if (!file.good())
+    csvmm csv;
+
+    if (csv.read(filename) && csv.size() > 0)
     {
-        std::cerr << "Error: Failed to open file " << filename << std::endl;
-        return false;
+        std::cout << html_begin;
+        for (size_t row = 0; row < csv.size(); ++row)
+        {
+            std::cout << "<tr>\n";
+            for (size_t col = 0; col < csv.size(row); ++col)
+            {
+                std::string field = csv.to_string(row, col, true);
+                std::cout << "  <td>"
+                    << encode(field)
+                    << "</td>\n";
+            }
+            std::cout << "</tr>\n";
+        }
+        std::cout << html_end;
+        std::cout.flush();
     }
-
-    // read file line by line
-    std::string line;
-    while (std::getline(file, line))
+    else
     {
-        process_line(line);
+        std::cerr << "Error: Could not open file " << filename << '.'
+            << std::endl;
     }
-
-    file.close();
-
-    return true;
 }
 
 int main(int argc, char const *argv[])
@@ -81,10 +77,7 @@ int main(int argc, char const *argv[])
     }
     else
     {
-        std::cout << html_begin;
         csv2html(argv[1]);
-        std::cout << html_end;
-        std::cout.flush();
     }
 
     return 0;
