@@ -7,13 +7,13 @@
 const std::string html_begin =
     "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>csvtohtm"
     "l</title>\n<style type=\"text/css\">\ntable.csvtohtml{border-collapse:coll"
-    "apse;border-spacing:0;display:block;width:100%;overflow:auto;font-size:1em"
-    ";word-break:normal;word-break:keep-all;}\ntable.csvtohtml td{padding:0;pad"
-    "ding:2px 4px;border:1px solid #ddd;}\ntable.csvtohtml tr{border:0;backgrou"
-    "nd-color:#fff;border-top:1px solid #ccc;}\ntable.csvtohtml tr:nth-child(1)"
-    "{background-color: #007098;color: white;font-weight: bold;}\ntable.csvtoht"
-    "ml tr:nth-child(2n){background-color: #f8f8f8;}\n</style>\n</head>\n<body>"
-    "\n<table class=\"csvtohtml\">\n<tbody>\n";
+    "apse;border-spacing:0;display:block;width:100%;overflow:auto;font-size:12p"
+    "x;word-break:normal;word-break:keep-all;}\ntable.csvtohtml td{padding:0;pa"
+    "dding:2px 4px;border:1px solid #ddd;}\ntable.csvtohtml tr{border:0;backgro"
+    "und-color:#fff;border-top:1px solid #ccc;}\ntable.csvtohtml tr:nth-child(1"
+    "){background-color:#007098;color:white;font-weight:bold;}\ntable.csvtohtml"
+    " tr:nth-child(2n){background-color:#f8f8f8;}\n</style>\n</head>\n<body>\n<"
+    "table class=\"csvtohtml\">\n<tbody>\n";
 
 const std::string html_end = "</tbody>\n</table>\n</body>\n</html>\n";
 
