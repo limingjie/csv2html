@@ -40,7 +40,7 @@ std::string encode(const std::string& data)
     return buffer;
 }
 
-void csv2html(std::string filename)
+void csv2html(const std::string &filename)
 {
     csvmm csv;
 
@@ -69,7 +69,7 @@ void csv2html(std::string filename)
     }
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
