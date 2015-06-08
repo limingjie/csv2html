@@ -97,6 +97,8 @@ void PickFile_CB(Fl_Widget*, void*)
             csv2html(native.filename(i));
         }
     }
+
+    fl_alert("Done.");
 }
 
 int main(int argc, char *argv[])

@@ -22,27 +22,31 @@ CXXFLAGS = -Wall -g -O2 -std=c++0x
 
 all: csv2html$(X) csv2html_gui$(X)
 
-csv2html$(X): csvmm.o csv2html.o
+csv2html$(X): obj obj/csvmm.o obj/csv2html.o
 	@echo "==>Linking csv2html$(X)..."
-	$(CXX) -o csv2html$(X) csvmm.o csv2html.o
+	$(CXX) -o csv2html$(X) obj/csvmm.o obj/csv2html.o
 
-csv2html.o: csv2html.cpp csvmm.hpp
-	@echo "==>Compiling csv2html.cpp..."
-	$(CXX) -c $(CXXFLAGS) -o csv2html.o csv2html.cpp
-
-csvmm.o: csvmm.cpp csvmm.hpp
-	@echo "==>Compiling csvmm.cpp..."
-	$(CXX) -c $(CXXFLAGS) -o csvmm.o csvmm.cpp
-
-csv2html_gui$(X): csv2html_gui.o csvmm.o
+csv2html_gui$(X): obj obj/csv2html_gui.o obj/csvmm.o
 	@echo "==>Linking csv2html_gui$(X)..."
-	$(CXX) -o csv2html_gui$(X) csv2html_gui.o csvmm.o $(FLTK_LDSTATIC)
+	$(CXX) -o csv2html_gui$(X) obj/csv2html_gui.o obj/csvmm.o $(FLTK_LDSTATIC)
 
-csv2html_gui.o: csv2html_gui.cpp
-	@echo "==>Compiling csv2html_gui.cpp..."
-	$(CXX) -c $(CXXFLAGS) $(FLTK_CXXFLAGS) -o csv2html_gui.o csv2html_gui.cpp
+obj:
+	@echo "==>Creating directory for objects..."
+	mkdir obj
+
+obj/csv2html.o: src/csv2html.cpp src/csvmm.hpp
+	@echo "==>Compiling src/csv2html.cpp..."
+	$(CXX) -c $(CXXFLAGS) -o obj/csv2html.o src/csv2html.cpp
+
+obj/csvmm.o: src/csvmm.cpp src/csvmm.hpp
+	@echo "==>Compiling src/csvmm.cpp..."
+	$(CXX) -c $(CXXFLAGS) -o obj/csvmm.o src/csvmm.cpp
+
+obj/csv2html_gui.o: src/csv2html_gui.cpp
+	@echo "==>Compiling src/csv2html_gui.cpp..."
+	$(CXX) -c $(CXXFLAGS) $(FLTK_CXXFLAGS) -o obj/csv2html_gui.o src/csv2html_gui.cpp
 
 clean:
 	@echo "==>Cleaning..."
-	rm -rf *.o
+	rm -rf obj/*.o
 	rm -rf csv2html$(X) csv2html_gui$(X)
