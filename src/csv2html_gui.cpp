@@ -8,7 +8,7 @@
 #include <fstream>
 #include <string>
 
-#include "csvmm.hpp"
+#include <csvmm/csvmm.hpp>
 
 const std::string html_begin =
     "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>csvtohtm"

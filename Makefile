@@ -18,7 +18,7 @@ endif
 
 FLTK_CXXFLAGS  = $(shell fltk-config --cxxflags)
 FLTK_LDSTATIC  = $(shell fltk-config --ldstaticflags)
-CXXFLAGS = -Wall -g -O2 -std=c++0x
+CXXFLAGS = -Wall -g -O2 -std=c++0x -I.
 
 all: csv2html$(X) csv2html_gui$(X)
 
@@ -34,13 +34,13 @@ obj:
 	@echo "==>Creating directory for objects..."
 	mkdir obj
 
-obj/csv2html.o: src/csv2html.cpp src/csvmm.hpp
+obj/csv2html.o: src/csv2html.cpp csvmm/csvmm.hpp
 	@echo "==>Compiling src/csv2html.cpp..."
 	$(CXX) -c $(CXXFLAGS) -o obj/csv2html.o src/csv2html.cpp
 
-obj/csvmm.o: src/csvmm.cpp src/csvmm.hpp
-	@echo "==>Compiling src/csvmm.cpp..."
-	$(CXX) -c $(CXXFLAGS) -o obj/csvmm.o src/csvmm.cpp
+obj/csvmm.o: csvmm/csvmm.cpp csvmm/csvmm.hpp
+	@echo "==>Compiling csvmm/csvmm.cpp..."
+	$(CXX) -c $(CXXFLAGS) -o obj/csvmm.o csvmm/csvmm.cpp
 
 obj/csv2html_gui.o: src/csv2html_gui.cpp
 	@echo "==>Compiling src/csv2html_gui.cpp..."
