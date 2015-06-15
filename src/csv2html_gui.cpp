@@ -80,7 +80,8 @@ void csv2html(const std::string &filename, bool encode_text)
     }
     else
     {
-        fl_alert("Failed to open input file or file empty (%s)!", filename.c_str());
+        fl_alert("Failed to open input file or file empty (%s)!",
+            filename.c_str());
     }
 }
 
@@ -93,7 +94,8 @@ public:
     window(int x, int y, int w, int h, const char *label = 0)
         : Fl_Window(x, y, w, h, label)
     {
-        Fl_Box *o = new Fl_Box(10, 10, 300, 25, "Open CSV file to convert to HTML -->");
+        Fl_Box *o = new Fl_Box(10, 10, 300, 25,
+            "Open CSV file to convert to HTML -->");
         o->box(FL_BORDER_BOX);
         o->align(FL_ALIGN_INSIDE | FL_ALIGN_WRAP| FL_ALIGN_CENTER);
         o->color((Fl_Color)215);
@@ -102,8 +104,9 @@ public:
         Fl_Button *but = new Fl_Button(320, 10, 80, 25, "Pick File");
         but->callback(on_pick_button_click, this);
 
-        encode_check = new Fl_Check_Button(10, 40, 280, 25, "Escape special HTML characters.");
-        encode_check->value(0);
+        encode_check = new Fl_Check_Button(10, 40, 280, 25,
+            "Escape special HTML characters.");
+        encode_check->value(1);
 
         Fl_Button *author = new Fl_Button(320, 40, 80, 25, "Mingjie Li");
         author->box(FL_FLAT_BOX);
