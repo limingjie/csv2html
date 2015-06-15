@@ -3,7 +3,9 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Native_File_Chooser.H>
+#include <FL/Fl_Check_Button.H>
 #include <FL/fl_ask.H> // fl_alert
+#include <FL/filename.H> // fl_open_uri
 
 #include <fstream>
 #include <string>
@@ -46,7 +48,7 @@ std::string encode(const std::string& data)
     return buffer;
 }
 
-void csv2html(const std::string &filename)
+void csv2html(const std::string &filename, bool encode_text)
 {
     csvmm csv;
 
@@ -63,7 +65,7 @@ void csv2html(const std::string &filename)
                 {
                     std::string field = csv.to_string(row, col, true);
                     ofs << "  <td>"
-                        << encode(field)
+                        << (encode_text ? encode(field) : field)
                         << "</td>\n";
                 }
                 ofs << "</tr>\n";
@@ -82,39 +84,69 @@ void csv2html(const std::string &filename)
     }
 }
 
-void PickFile_CB(Fl_Widget*, void*)
+class window : public Fl_Window
 {
-    Fl_Native_File_Chooser native;
-    native.title("Pick a file");
-    native.type(Fl_Native_File_Chooser::BROWSE_MULTI_FILE);
-    native.filter("CSV\t*.csv");
+private:
+    Fl_Check_Button *encode_check;
 
-    if (native.show() == 0)
+public:
+    window(int x, int y, int w, int h, const char *label = 0)
+        : Fl_Window(x, y, w, h, label)
     {
-        int count = native.count();
-        for (int i = 0; i < count; ++i)
-        {
-            csv2html(native.filename(i));
-        }
-    }
-
-    fl_alert("Done.");
-}
-
-int main(int argc, char *argv[])
-{
-    Fl::get_system_colors();
-    Fl_Window *window = new Fl_Window(100, 100, 350, 45, "CSV2HTML");
-    {
-        Fl_Box *o = new Fl_Box(10, 10, 240, 25, "Open CSV file to convert to HTML.");
+        Fl_Box *o = new Fl_Box(10, 10, 300, 25, "Open CSV file to convert to HTML.");
         o->box(FL_BORDER_BOX);
         o->align(FL_ALIGN_INSIDE | FL_ALIGN_WRAP| FL_ALIGN_CENTER);
         o->color((Fl_Color)215);
         o->labelfont(FL_HELVETICA_BOLD);
 
-        Fl_Button *but = new Fl_Button(260, 10, 80, 25, "Pick File");
-        but->callback(PickFile_CB);
+        Fl_Button *but = new Fl_Button(320, 10, 80, 25, "Pick File");
+        but->callback(on_pick_button_click, this);
+
+        encode_check = new Fl_Check_Button(10, 40, 120, 25, "Encode Text");
+        encode_check->value(0);
+
+        Fl_Button *author = new Fl_Button(10, 65, 390, 15,
+            "Mingjie Li (https://github.com/limingjie/csv2html)");
+        author->box(FL_FLAT_BOX);
+        author->align(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT);
+        author->labelsize(12);
+        author->labelcolor(fl_rgb_color(128, 128, 128));
+        author->callback(on_author_click, this);
     }
-    window->show();
+
+    static void on_pick_button_click(Fl_Widget *sender, void *obj)
+    {
+        Fl_Native_File_Chooser native;
+        native.title("Pick a file");
+        native.type(Fl_Native_File_Chooser::BROWSE_MULTI_FILE);
+        native.filter("CSV\t*.csv");
+
+        if (native.show() == 0)
+        {
+            bool encode = (((window *)obj)->encode_check->value() == 1);
+            int count = native.count();
+            for (int i = 0; i < count; ++i)
+            {
+                csv2html(native.filename(i), encode);
+            }
+
+            fl_alert("Done.");
+        }
+    }
+
+    static void on_author_click(Fl_Widget *sender, void *obj)
+    {
+        char errmsg[512];
+        fl_open_uri("https://github.com/limingjie/csv2html",
+            errmsg, sizeof(errmsg));
+    }
+
+};
+
+int main(int argc, char *argv[])
+{
+    Fl::get_system_colors();
+    window *w = new window(100, 100, 410, 80, "CSV2HTML");
+    w->show();
     return Fl::run();
 }
