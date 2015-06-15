@@ -93,7 +93,7 @@ public:
     window(int x, int y, int w, int h, const char *label = 0)
         : Fl_Window(x, y, w, h, label)
     {
-        Fl_Box *o = new Fl_Box(10, 10, 300, 25, "Open CSV file to convert to HTML.");
+        Fl_Box *o = new Fl_Box(10, 10, 300, 25, "Open CSV file to convert to HTML -->");
         o->box(FL_BORDER_BOX);
         o->align(FL_ALIGN_INSIDE | FL_ALIGN_WRAP| FL_ALIGN_CENTER);
         o->color((Fl_Color)215);
@@ -102,11 +102,10 @@ public:
         Fl_Button *but = new Fl_Button(320, 10, 80, 25, "Pick File");
         but->callback(on_pick_button_click, this);
 
-        encode_check = new Fl_Check_Button(10, 40, 120, 25, "Encode Text");
+        encode_check = new Fl_Check_Button(10, 40, 280, 25, "Escape special HTML characters.");
         encode_check->value(0);
 
-        Fl_Button *author = new Fl_Button(10, 65, 390, 15,
-            "Mingjie Li (https://github.com/limingjie/csv2html)");
+        Fl_Button *author = new Fl_Button(320, 40, 80, 25, "Mingjie Li");
         author->box(FL_FLAT_BOX);
         author->align(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT);
         author->labelsize(12);
@@ -146,7 +145,7 @@ public:
 int main(int argc, char *argv[])
 {
     Fl::get_system_colors();
-    window *w = new window(100, 100, 410, 80, "CSV2HTML");
+    window *w = new window(100, 100, 410, 70, "CSV2HTML");
     w->show();
     return Fl::run();
 }
