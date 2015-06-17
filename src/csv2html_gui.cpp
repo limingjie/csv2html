@@ -48,47 +48,47 @@ std::string encode(const std::string& data)
     return buffer;
 }
 
-void csv2html(const std::string &filename, bool encode_text)
+bool csv2html(const std::string &filename, bool encode_text)
 {
     csvmm csv;
-
-    if (csv.read(filename) && csv.size() > 0)
-    {
-        std::ofstream ofs(filename + ".html", std::ios_base::out);
-        if (ofs)
-        {
-            ofs << html_begin;
-            for (size_t row = 0; row < csv.size(); ++row)
-            {
-                ofs << "<tr>\n";
-                for (size_t col = 0; col < csv.size(row); ++col)
-                {
-                    std::string field = csv.to_string(row, col, true);
-                    ofs << "  <td>"
-                        << (encode_text ? encode(field) : field)
-                        << "</td>\n";
-                }
-                ofs << "</tr>\n";
-            }
-            ofs << html_end;
-            ofs.close();
-        }
-        else
-        {
-            fl_alert("Failed to open output file %s.html!", filename.c_str());
-        }
-    }
-    else
+    if (!csv.read(filename) || csv.size() == 0)
     {
         fl_alert("Failed to open input file or file empty (%s)!",
             filename.c_str());
+        return false;
     }
+
+    std::ofstream ofs(filename + ".html", std::ios_base::out);
+    if (!ofs)
+    {
+        fl_alert("Failed to open output file %s.html!", filename.c_str());
+        return false;
+    }
+
+    ofs << html_begin;
+    for (size_t row = 0; row < csv.size(); ++row)
+    {
+        ofs << "<tr>\n";
+        for (size_t col = 0; col < csv.size(row); ++col)
+        {
+            std::string field = csv.to_string(row, col, true);
+            ofs << "  <td>"
+                << (encode_text ? encode(field) : field)
+                << "</td>\n";
+        }
+        ofs << "</tr>\n";
+    }
+    ofs << html_end;
+    ofs.close();
+
+    return true;
 }
 
 class window : public Fl_Window
 {
 private:
     Fl_Check_Button *encode_check;
+    Fl_Check_Button *open_file_check;
 
 public:
     window(int x, int y, int w, int h, const char *label = 0)
@@ -101,14 +101,18 @@ public:
         o->color((Fl_Color)215);
         o->labelfont(FL_HELVETICA_BOLD);
 
-        Fl_Button *but = new Fl_Button(320, 10, 80, 25, "Pick File");
+        Fl_Button *but = new Fl_Button(320, 10, 80, 25, "Pick Files");
         but->callback(on_pick_button_click, this);
 
         encode_check = new Fl_Check_Button(10, 40, 280, 25,
             "Escape special HTML characters.");
         encode_check->value(1);
 
-        Fl_Button *author = new Fl_Button(320, 40, 80, 25, "Mingjie Li");
+        open_file_check = new Fl_Check_Button(10, 65, 280, 25,
+            "Open HTML in browser.");
+        open_file_check->value(1);
+
+        Fl_Button *author = new Fl_Button(320, 65, 80, 25, "Mingjie Li");
         author->box(FL_FLAT_BOX);
         author->align(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT);
         author->labelsize(12);
@@ -126,13 +130,24 @@ public:
         if (native.show() == 0)
         {
             bool encode = (((window *)obj)->encode_check->value() == 1);
+            bool open = (((window *)obj)->open_file_check->value() == 1);
             int count = native.count();
             for (int i = 0; i < count; ++i)
             {
-                csv2html(native.filename(i), encode);
-            }
+                std::string filename = native.filename(i);
+                if (csv2html(filename, encode) && open)
+                {
+                    std::string uri("file://");
+                    if (filename[0] != '/')
+                    {
+                        uri.push_back('/'); // Windows
+                    }
+                    uri += filename + ".html";
 
-            fl_alert("Done.");
+                    char errmsg[512];
+                    fl_open_uri(uri.c_str(), errmsg, sizeof(errmsg));
+                }
+            }
         }
     }
 
@@ -148,7 +163,7 @@ public:
 int main(int argc, char *argv[])
 {
     Fl::get_system_colors();
-    window *w = new window(100, 100, 410, 70, "CSV2HTML");
+    window *w = new window(100, 100, 410, 95, "CSV2HTML");
     w->show();
     return Fl::run();
 }
